@@ -1,0 +1,18 @@
+<div class="tile_container" (click)="playerClick()" 
+[class.left_tile_border]="tileNumber === 0 || tileNumber === 3 || tileNumber === 6"
+[class.bottom_tile_border]="tileNumber === 6 || tileNumber === 7 || tileNumber === 8"
+[class.right_tile_border]="tileNumber === 2 || tileNumber === 5 || tileNumber === 8"
+[class.top_tile_border]="tileNumber === 0 || tileNumber === 1 || tileNumber === 2"
+[class.middle_border]="tileNumber === 4">
+    <div *ngIf="tileIsClicked" class="tile_pressed">
+        <div class="player_one_tile" *ngIf="showX else showOther">
+            <div class="tile_x"></div>
+            <div class="tile_y"></div>
+        </div>
+        <ng-template #showOther>
+            <div class="player_two_tile">
+                <div class="tile_o"></div>
+            </div>
+        </ng-template>
+    </div>
+</div>
