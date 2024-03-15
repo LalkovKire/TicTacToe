@@ -11,16 +11,18 @@ import { TileServiceService } from '../services/tile-service.service';
 })
 export class SingleTileComponent {
 
-  public tileIsClicked : boolean;
-  public showX : boolean;
-  public currentPlayer : number = 1;
-  public gameAction : string = "";
-  @Input()
-  public tileNumber : number = 0;
+  tileIsClicked : boolean;
+  showX : boolean;
+  currentPlayer : number;
+  gameAction : string;
+  @Input() tileNumber : number;
 
   constructor(private service: TileServiceService){
     this.tileIsClicked = false;
     this.showX = false;
+    this.gameAction = "";
+    this.currentPlayer = 1;
+    this.tileNumber = 0;
     this.service.gameActionObserver$.subscribe(s => this.gameAction = s);
     this.service.clickedTileObserver$.subscribe(s => this.tileIsClicked = s);
     this.service.currentPlayerObserver$.subscribe(s => this.currentPlayer = s);

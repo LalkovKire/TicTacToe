@@ -86,3 +86,17 @@
     animation-name: scale;
     animation-duration: 2s;
 }
+
+
+@media (max-width: 819px) {
+    .tile_container {
+        width: 99px;
+        height: 99px;
+    }
+    .tile_x {
+        width: 60px;
+    }
+    .tile_y {
+        width: 60px;
+    }
+}
