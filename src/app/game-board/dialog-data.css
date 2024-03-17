@@ -1,0 +1,13 @@
+.custom-title {
+     text-align: center;
+} 
+.custom-winner { 
+    text-align: center; 
+    color: green;
+} 
+div { 
+    width: 100%; 
+} 
+.custom-draw {
+    text-align: center; 
+}

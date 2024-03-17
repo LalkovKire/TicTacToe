@@ -1,31 +1,32 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { Component, Input, NgModule, OnInit } from '@angular/core';
 import { TileServiceService } from '../services/tile-service.service';
 
 @Component({
   selector: 'app-single-tile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,NgClass],
   templateUrl: './single-tile.component.html',
   styleUrl: './single-tile.component.css'
 })
 export class SingleTileComponent {
 
-  tileIsClicked : boolean;
-  showX : boolean;
-  currentPlayer : number;
-  gameAction : string;
-  @Input() tileNumber : number;
+  tileIsClicked : boolean = false;
+  showX : boolean = false;
+  currentPlayer : number = 1;
+  gameAction : string = "";
+  winningTiles: number[] = [];
+  tileIsWinner : boolean = false;
+  @Input() tileNumber : number = 0;
 
   constructor(private service: TileServiceService){
-    this.tileIsClicked = false;
-    this.showX = false;
-    this.gameAction = "";
-    this.currentPlayer = 1;
-    this.tileNumber = 0;
     this.service.gameActionObserver$.subscribe(s => this.gameAction = s);
     this.service.clickedTileObserver$.subscribe(s => this.tileIsClicked = s);
     this.service.currentPlayerObserver$.subscribe(s => this.currentPlayer = s);
+    this.service.winningTiles$.subscribe(s => {
+      this.winningTiles = s;
+      this.tileIsWinner = this.winningTiles.includes(this.tileNumber);
+    });
   }
 
   playerClick() {

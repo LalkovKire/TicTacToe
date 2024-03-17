@@ -12,12 +12,14 @@ export class TileServiceService {
   private currentPlayer = new BehaviorSubject<number>(1);
   private winner = new BehaviorSubject<number>(3);
   private playerScores = new BehaviorSubject<number[]>([0,0]);
+  private winningTiles = new BehaviorSubject<number[]>([]); 
 
   public playerScoreObserver$ : Observable<number[]> = this.playerScores.asObservable();
   public clickedTileObserver$ : Observable<boolean> = this.clickedTile.asObservable();
   public gameActionObserver$ : Observable<string> = this.gameAction.asObservable();
   public currentPlayerObserver$ : Observable<number> = this.currentPlayer.asObservable();
   public winnerObserver$ : Observable<number> = this.winner.asObservable();
+  public winningTiles$ : Observable<number[]> = this.winningTiles.asObservable();
   
   constructor() {
   }
@@ -41,7 +43,7 @@ export class TileServiceService {
           if ((tmp == 1 || tmp == 2) && tmp == this.gameStats[i+1] && tmp == this.gameStats[i+2]) {
             this.gameAction.next("ENDED");
             this.winner.next(tmp);
-            console.log("hori", tmp);
+            this.winningTiles.next([i,i+1,i+2]);
             this.updateScore(tmp);
             return;
           }
@@ -52,7 +54,7 @@ export class TileServiceService {
           if ((tmp == 1 || tmp == 2) && tmp == this.gameStats[i+3] && tmp == this.gameStats[i+6]){
             this.gameAction.next("ENDED");
             this.winner.next(tmp);
-            console.log("vertical",tmp);
+            this.winningTiles.next([i,i+3,i+6]);
             this.updateScore(tmp);
             return;
           } 
@@ -64,7 +66,7 @@ export class TileServiceService {
         if (leftDiagonal == this.gameStats[4] && leftDiagonal == this.gameStats[8]) { 
           this.gameAction.next("ENDED");
           this.winner.next(leftDiagonal);
-          console.log("left", leftDiagonal);
+          this.winningTiles.next([0,4,8]);
           this.updateScore(leftDiagonal);
           return;
         }
@@ -73,16 +75,18 @@ export class TileServiceService {
         if (rightDiagonal == this.gameStats[4] && rightDiagonal == this.gameStats[6]) {
           this.gameAction.next("ENDED");
           this.winner.next(rightDiagonal);
-          console.log("Right", rightDiagonal);
+          this.winningTiles.next([2,4,6]);
           this.updateScore(rightDiagonal);
           return;
         }
       }
+      // No remaining tiles left
       if (this.gameStats.every(tile => tile !== 3)) {
           this.gameAction.next("ENDED");
           this.winner.next(4); 
           return;
       }
+      // Default no winner , continue
       this.winner.next(3);
   }
 
@@ -92,6 +96,7 @@ export class TileServiceService {
     this.clickedTile.next(false);
     this.currentPlayer.next(1);
     this.winner.next(3);
+    this.winningTiles.next([]);
   }
 
   public updateScore(tmp : number) {

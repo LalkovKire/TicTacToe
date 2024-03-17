@@ -34,9 +34,10 @@ h3 {
 .winner {
     color: green;
 }
-.custom-dialog .mat-dialog-container {
-    background-color: red !important;
+::ng-deep .mat-mdc-dialog-container {
+    --mdc-dialog-container-color: rgb(212, 198, 166);
 }
+
 @media (max-width: 819px) {
     .main_container {
         flex-direction: column;

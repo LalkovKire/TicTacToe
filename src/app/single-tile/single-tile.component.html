@@ -5,13 +5,13 @@
 [class.top_tile_border]="tileNumber === 0 || tileNumber === 1 || tileNumber === 2"
 [class.middle_border]="tileNumber === 4">
     <div *ngIf="tileIsClicked" class="tile_pressed">
-        <div class="player_one_tile" *ngIf="showX else showOther">
+        <div class="player_one_tile" *ngIf="showX else showOther" [ngClass]="{ 'winning_tile': tileIsWinner }">
             <div class="tile_x"></div>
             <div class="tile_y"></div>
         </div>
-        <ng-template #showOther>
+        <ng-template #showOther >
             <div class="player_two_tile">
-                <div class="tile_o"></div>
+                <div class="tile_o" [ngClass]="{ 'winning_tile': tileIsWinner }"></div>
             </div>
         </ng-template>
     </div>
