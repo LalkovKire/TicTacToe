@@ -7,26 +7,30 @@
     background-color:  rgba(159, 137, 87, 0.1);
 }
 .left_tile_border {
-    border-left: none !important;
-    border-top: none !important;
+    border-left: none;
+    border-top: none;
 }
 .right_tile_border {
-    border-right: none !important;
-    border-top: none !important;
+    border-right: none;
+    border-top: none;
 }
 .bottom_tile_border {
-    border-bottom: none !important;
-    border-right: none !important;
+    border-bottom: none;
+    border-right: none;
 }
 .top_tile_border {
-    border-top: none !important;
-    border-left: none !important;
+    border-top: none;
+    border-left: none;
 }
 .tile_container:hover {
     cursor: pointer;
 }
+.bottom_middle_border {
+    border-top: none;
+}
 .middle_border {
-    border: none;
+   border: none;
+   border-bottom: 1px solid black !important;
 }
 .player_one_tile {
     filter: drop-shadow(0 0.2rem 0.25rem rgba(3, 216, 249, 0.453));

@@ -3,7 +3,8 @@
 [class.bottom_tile_border]="tileNumber === 6 || tileNumber === 7 || tileNumber === 8"
 [class.right_tile_border]="tileNumber === 2 || tileNumber === 5 || tileNumber === 8"
 [class.top_tile_border]="tileNumber === 0 || tileNumber === 1 || tileNumber === 2"
-[class.middle_border]="tileNumber === 4">
+[class.middle_border]="tileNumber === 4"
+[class.bottom_middle_border]="tileNumber === 7">
     <div *ngIf="tileIsClicked" class="tile_pressed">
         <div class="player_one_tile" *ngIf="showX else showOther" [ngClass]="{ 'winning_tile': tileIsWinner }">
             <div class="tile_x"></div>
