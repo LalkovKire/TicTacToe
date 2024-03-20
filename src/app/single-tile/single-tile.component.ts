@@ -1,45 +1,54 @@
-import { CommonModule, NgClass } from '@angular/common';
-import { Component, Input, NgModule, OnInit } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { TileServiceService } from '../services/tile-service.service';
+import { GameAction, GameState } from '../model/gameState';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-single-tile',
   standalone: true,
-  imports: [CommonModule,NgClass],
+  imports: [NgClass],
   templateUrl: './single-tile.component.html',
   styleUrl: './single-tile.component.css'
 })
-export class SingleTileComponent {
+export class SingleTileComponent implements OnInit, OnDestroy {
 
-  tileIsClicked : boolean = false;
-  showX : boolean = false;
-  currentPlayer : number = 1;
-  gameAction : string = "";
-  winningTiles: number[] = [];
-  tileIsWinner : boolean = false;
-  @Input() tileNumber : number = 0;
+  private gameStateSubscription!: Subscription; 
+  private clickedTileSubscription! : Subscription; 
+  gameState!: GameState;
+  tileIsClicked!: boolean;
+  showX!: boolean;
+  tileIsWinner! : boolean;
+  @Input() tileNumber!: number;
 
   constructor(private service: TileServiceService){
-    this.service.gameActionObserver$.subscribe(s => this.gameAction = s);
-    this.service.clickedTileObserver$.subscribe(s => this.tileIsClicked = s);
-    this.service.currentPlayerObserver$.subscribe(s => this.currentPlayer = s);
-    this.service.winningTiles$.subscribe(s => {
-      this.winningTiles = s;
-      this.tileIsWinner = this.winningTiles.includes(this.tileNumber);
-    });
   }
 
-  playerClick() {
-    if (this.tileIsClicked || this.gameAction == "ENDED") return;
+  ngOnInit(): void {
+    this.gameStateSubscription = this.service.getState().subscribe( (s : GameState) => {
+      this.gameState = s;
+      this.tileIsWinner = this.gameState.winningTiles.includes(this.tileNumber);
+    })
+    this.clickedTileSubscription = this.service.clickedTileObserver$.subscribe( (tile : boolean ) => this.tileIsClicked = tile);
+    this.showX = false;
+  }
+
+  playerClick() : void {
+    if ( this.tileIsClicked || this.gameState.gameAction === GameAction.ENDED ) return;
     else {
       this.tileIsClicked = true;
-      if (this.currentPlayer == 1) {
+      if (this.gameState.currentPlayer === 1 ) {
         this.showX = true;
-        this.service.updateTable(this.tileNumber);
+        this.service.updateGameTable(this.gameState,this.tileNumber);
       } else {
         this.showX = false;
-        this.service.updateTable(this.tileNumber);
+        this.service.updateGameTable(this.gameState,this.tileNumber);
       }
     }
+  }
+
+  ngOnDestroy(): void {
+    this.gameStateSubscription.unsubscribe();
+    this.clickedTileSubscription.unsubscribe();
   }
 }

@@ -1,0 +1,42 @@
+.custom-title {
+    margin: 15px 0 15px 0;
+    text-align: center;
+    font-family: "Protest Revolution", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 2.5em;
+} 
+.custom-winner { 
+    text-align: center; 
+    background: linear-gradient(to right, #3a3c3b, #088278,#118e08, #6203ab);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    font-family: "Piedra", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 3.4em;
+    line-height:normal;
+} 
+div { 
+    width: 100%; 
+} 
+.custom-draw {
+    text-align: center; 
+    background: linear-gradient(to right, #101211, #101c1b,#020b02, #100617);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    font-family: "Piedra", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 3.4em;
+    line-height:normal;
+}
+
+@media (max-width: 500px) {
+    .custom-winner {
+        font-size: 2.3em;
+    }
+    .custom-draw {
+        font-size: 2.3em;
+    }
+}

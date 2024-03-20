@@ -2,19 +2,25 @@
     <div class="game_metadata">
       <h1>TIC-TAC-TOE</h1>
       <div>
-        <h3>Current player: &nbsp;&nbsp; {{ playerTurn }}</h3>
+        @if( gameState.currentPlayer === 1) {
+          <h3>Current player: &nbsp;&nbsp; Player X</h3>
+        } @else {
+          <h3>Current player: &nbsp;&nbsp; Player O</h3>
+        }
       </div>
       <div>
         <h3>Scores:<br></h3>
-        <div><h3>Player X:  &nbsp;&nbsp;<span>{{ scores[0] }}</span></h3></div>
-        <div><h3>Player O:  &nbsp;&nbsp;<span>{{ scores[1] }}</span></h3></div>
+        <div><h3>Player X:  &nbsp;&nbsp;<span>{{ gameState.playerScores[0] }}</span></h3></div>
+        <div><h3>Player O:  &nbsp;&nbsp;<span>{{ gameState.playerScores[1] }}</span></h3></div>
       </div>
       <div>
         <button class="btn" (click)="newGame()">Play Again</button>
       </div>
     </div>
-    <div class="game_container">
-      <app-single-tile *ngFor="let i of counter" [tileNumber]="i">
-      </app-single-tile>
+    <div class="game_container" [ngClass]="{'zoom-out': gameContainerAnimations === 'zoomOut', 'zoom-in': gameContainerAnimations === 'zoomIn'}">
+      @for (i of counter; track $index) {
+        <app-single-tile [tileNumber]="i">
+        </app-single-tile>
+      }
     </div>
 </div>

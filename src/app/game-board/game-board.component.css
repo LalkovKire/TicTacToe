@@ -29,6 +29,7 @@ h3 {
     border: none;
     color: white;
     cursor: pointer;
+    border-radius: 15px;
     background-color: rgb(87, 85, 88);
 }
 .winner {
@@ -37,6 +38,36 @@ h3 {
 ::ng-deep .mat-mdc-dialog-container {
     --mdc-dialog-container-color: rgb(212, 198, 166);
 }
+.zoom-out {
+    animation: zoomOut 0.5s forwards;
+}
+  
+.zoom-in {
+    animation: zoomIn 0.5s forwards;
+}
+
+@keyframes zoomOut {
+    0% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0) rotate(360deg);
+      opacity: 0;
+    }
+}
+  
+  @keyframes zoomIn {
+    0% {
+      transform: scale(0) rotate(0deg);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) rotate(360deg);
+      opacity: 1;
+    }
+}
+  
 
 @media (max-width: 819px) {
     .main_container {

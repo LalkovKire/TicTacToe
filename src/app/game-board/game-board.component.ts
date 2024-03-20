@@ -1,60 +1,70 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TileServiceService } from '../services/tile-service.service';
 import { SingleTileComponent } from '../single-tile/single-tile.component';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogRef, MatDialogClose, MatDialogContent, MatDialogTitle} from '@angular/material/dialog';
-import { CommonModule } from '@angular/common';
-import {MatButtonModule} from '@angular/material/button';
+import { MatDialog, MatDialogActions} from '@angular/material/dialog';
+import { GameState } from '../model/gameState';
+import { GameDialog } from '../game-dialog/game-dialog.component';
+import { Subscription } from 'rxjs';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-game-board',
   standalone: true,
-  imports: [CommonModule, SingleTileComponent, MatDialogActions],
+  imports: [SingleTileComponent, MatDialogActions, NgClass],
   templateUrl: './game-board.component.html',
-  styleUrl: './game-board.component.css'
+  styleUrl: './game-board.component.css',
 })
-export class GameBoardComponent implements OnInit {
+export class GameBoardComponent implements OnInit, OnDestroy {
 
-  counter: number[] = [];
-  playerTurn: String = "Player X";
-  checkWinner: boolean = false;
-  winnerName: string = "";
-  scores: number[] = [];
+  private gameStateSubscription!: Subscription; 
+  counter: number[];
+  gameState!: GameState;
+  checkWinner: boolean;
+  winnerName: string;
+  gameContainerAnimations: 'zoomIn' | 'zoomOut' | undefined;
 
-  constructor(private service: TileServiceService, public dialog: MatDialog){
-      this.service.currentPlayerObserver$.subscribe(s =>  {
-        if (s == 1) this.playerTurn = "Player X";
-        else this.playerTurn = "Player O";
-      });
-      this.service.winnerObserver$.subscribe(s => {
-        if ( s != 3 ) {
-          this.checkWinner = true;
-          this.getWinnerName(s);
-          this.openDialog('500ms', '500ms'); 
-        }
-      });
-      this.service.playerScoreObserver$.subscribe(s => this.scores = s);
+  constructor(private service: TileServiceService, private dialog: MatDialog){
+    this.checkWinner = false;
+    this.winnerName = "";
+    this.counter = [];
+    this.gameContainerAnimations = undefined;
   }
 
-  ngOnInit(): void {
+  ngOnInit() : void {
     for (let i=0;i<9;i++) this.counter.push(i);
+    this.gameStateSubscription = this.service.getState().subscribe( (s : GameState) => {
+      this.gameState = s;
+      if (s.winner != 3 && !this.checkWinner) {
+        this.checkWinner = true;
+        this.getWinnerName(s.winner);
+        this.openDialog('500ms','500ms');
+      }
+    })
   }
 
-  getWinnerName(s : any) {
-    if (s == 1){
+  getWinnerName(winner : number) : void {
+    if (winner == 1){
       this.winnerName = "Player X"; 
-    } else if ( s == 2) {
+    } else if ( winner == 2) {
       this.winnerName = "Player O";
-    } else if ( s == 4 ) {
+    } else if ( winner == 4 ) {
       this.winnerName = "Draw";
     } else this.checkWinner = false;
   }
   
-  newGame() {
-    this.service.resetGame();
+  newGame() : void {
+    this.service.resetGame(this.gameState);
+    this.checkWinner = false;
+    this.gameContainerAnimations = 'zoomOut'; 
+    setTimeout(() => {
+      this.service.resetGame(this.gameState);
+      this.checkWinner = false;
+      this.gameContainerAnimations = 'zoomIn'; 
+    }, 500);
   }
 
-  openDialog(enterAnimationDuration: string, exitAnimationDuration: string) {
-    this.dialog.open(DialogDataExampleDialog, {
+  openDialog(enterAnimationDuration: string, exitAnimationDuration: string) : void {
+    this.dialog.open(GameDialog, {
       width: "450px", 
       data: {
         winnerName: this.winnerName,
@@ -64,15 +74,7 @@ export class GameBoardComponent implements OnInit {
     });
   }
 
-}
-
-@Component({
-  selector: 'dialog-data-example-dialog',
-  templateUrl: 'dialog-data.html',
-  styleUrl: 'dialog-data.css',
-  standalone: true,
-  imports: [MatDialogActions,MatDialogClose, MatButtonModule, MatDialogContent, MatDialogTitle],
-})
-export class DialogDataExampleDialog {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<DialogDataExampleDialog>) {}
+  ngOnDestroy() : void {
+    this.gameStateSubscription.unsubscribe(); 
+  }
 }

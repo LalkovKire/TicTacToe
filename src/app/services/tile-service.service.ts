@@ -1,114 +1,142 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { GameAction, GameState } from '../model/gameState';
+import { INITAL_GAME_STATE } from '../model/mock-state';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TileServiceService {
 
-  private gameStats : number[] = Array(9).fill(3);
-  private clickedTile = new BehaviorSubject<boolean>(false);
-  private gameAction = new BehaviorSubject<string>("START");
-  private currentPlayer = new BehaviorSubject<number>(1);
-  private winner = new BehaviorSubject<number>(3);
-  private playerScores = new BehaviorSubject<number[]>([0,0]);
-  private winningTiles = new BehaviorSubject<number[]>([]); 
+  private state : BehaviorSubject<GameState>; 
 
-  public playerScoreObserver$ : Observable<number[]> = this.playerScores.asObservable();
+  // tile designated for animation
+  private clickedTile = new BehaviorSubject<boolean>(false);
   public clickedTileObserver$ : Observable<boolean> = this.clickedTile.asObservable();
-  public gameActionObserver$ : Observable<string> = this.gameAction.asObservable();
-  public currentPlayerObserver$ : Observable<number> = this.currentPlayer.asObservable();
-  public winnerObserver$ : Observable<number> = this.winner.asObservable();
-  public winningTiles$ : Observable<number[]> = this.winningTiles.asObservable();
   
   constructor() {
+    this.state = new BehaviorSubject<GameState>(INITAL_GAME_STATE);
   }
 
-  public updateTable(tileNumber: number) : void {
-    if (this.currentPlayer.value == 1) {
-      this.currentPlayer.next(2);
-      this.gameStats[tileNumber] = 1;
-    }  
-    else {
-      this.currentPlayer.next(1);
-      this.gameStats[tileNumber] = 2;
-    } 
-    this.checkForWinner();
+  getState() : Observable<GameState> {
+    return this.state.asObservable();
   }
 
-  public checkForWinner() : void {
+  updateGameTable(currentState : GameState, tileNumber: number) : void {
+    if (currentState.currentPlayer === 1) {
+      this.state.next({
+        ...currentState,
+        currentPlayer: 2,
+        gameStats: [...currentState.gameStats.slice(0,tileNumber), 1, ...currentState.gameStats.slice(tileNumber + 1)]
+      })
+    } else {
+      this.state.next({
+        ...currentState,
+        currentPlayer: 1,
+        gameStats: [...currentState.gameStats.slice(0,tileNumber), 2, ...currentState.gameStats.slice(tileNumber + 1)]
+      })
+    }
+    this.checkForWinner(this.state.value);
+  }
+
+  checkForWinner(currentState : GameState) : void {
+
+      let tmpGameStats = currentState.gameStats;
       // Horizontal iteration 
       for (let i=0;i<9;i+=3) {
-        let tmp = this.gameStats[i];
-          if ((tmp == 1 || tmp == 2) && tmp == this.gameStats[i+1] && tmp == this.gameStats[i+2]) {
-            this.gameAction.next("ENDED");
-            this.winner.next(tmp);
-            this.winningTiles.next([i,i+1,i+2]);
-            this.updateScore(tmp);
+        let tileValue = tmpGameStats[i];
+          if ((tileValue == 1 || tileValue == 2) && tileValue == tmpGameStats[i+1] && tileValue == tmpGameStats[i+2]) {
+            this.state.next({
+              ...currentState,
+              gameAction: GameAction.ENDED,
+              winner: tileValue,
+              winningTiles: [i,i+1,i+2]
+            })
+            this.updatePlayerScore(this.state.value,tileValue)
             return;
           }
       }
       // Vertical iteration 
       for (let i=0;i<3;i++) {
-        let tmp = this.gameStats[i];
-          if ((tmp == 1 || tmp == 2) && tmp == this.gameStats[i+3] && tmp == this.gameStats[i+6]){
-            this.gameAction.next("ENDED");
-            this.winner.next(tmp);
-            this.winningTiles.next([i,i+3,i+6]);
-            this.updateScore(tmp);
+        let tileValue = tmpGameStats[i];
+          if ((tileValue == 1 || tileValue == 2) && tileValue == tmpGameStats[i+3] && tileValue == tmpGameStats[i+6]){
+            this.state.next({
+              ...currentState,
+              gameAction: GameAction.ENDED,
+              winner: tileValue,
+              winningTiles: [i,i+3,i+6]
+            })
+            this.updatePlayerScore(this.state.value,tileValue);
             return;
           } 
       }
       // Diagonals
-      let leftDiagonal = this.gameStats[0];
-      let rightDiagonal = this.gameStats[2]; 
+      let leftDiagonal = tmpGameStats[0];
+      let rightDiagonal = tmpGameStats[2]; 
       if (leftDiagonal == 1 || leftDiagonal == 2) {
-        if (leftDiagonal == this.gameStats[4] && leftDiagonal == this.gameStats[8]) { 
-          this.gameAction.next("ENDED");
-          this.winner.next(leftDiagonal);
-          this.winningTiles.next([0,4,8]);
-          this.updateScore(leftDiagonal);
+        if (leftDiagonal == tmpGameStats[4] && leftDiagonal == tmpGameStats[8]) { 
+          this.state.next({
+            ...currentState,
+            gameAction: GameAction.ENDED,
+            winner: leftDiagonal,
+            winningTiles: [0,4,8]
+          })
+          this.updatePlayerScore(this.state.value,leftDiagonal);
           return;
         }
       }
       if (rightDiagonal == 1 || rightDiagonal == 2) {
-        if (rightDiagonal == this.gameStats[4] && rightDiagonal == this.gameStats[6]) {
-          this.gameAction.next("ENDED");
-          this.winner.next(rightDiagonal);
-          this.winningTiles.next([2,4,6]);
-          this.updateScore(rightDiagonal);
+        if (rightDiagonal == tmpGameStats[4] && rightDiagonal == tmpGameStats[6]) {
+          this.state.next({
+            ...currentState,
+            gameAction: GameAction.ENDED,
+            winner: rightDiagonal,
+            winningTiles: [2,4,6]
+          })
+          this.updatePlayerScore(this.state.value,rightDiagonal);
           return;
         }
       }
       // No remaining tiles left
-      if (this.gameStats.every(tile => tile !== 3)) {
-          this.gameAction.next("ENDED");
-          this.winner.next(4); 
-          return;
+      if (tmpGameStats.every(tile => tile !== 3)) {
+        this.state.next({
+          ...currentState,
+          gameAction: GameAction.ENDED,
+          winner: 4
+        })
+        return;
       }
       // Default no winner , continue
-      this.winner.next(3);
+      this.state.next({
+        ...currentState,
+        winner: 3
+      })
   }
-
-  public resetGame() {
-    this.gameStats = Array(9).fill(3);
-    this.gameAction.next("START");
+  // resets state to starting values except scores. 
+  resetGame(currentState: GameState) : void {
+    this.state.next({
+      ...currentState,
+      gameStats: Array(9).fill(3),
+      gameAction: GameAction.START,
+      currentPlayer: 1,
+      clickedTile: false,
+      winner: 3,
+      winningTiles: []
+    })
     this.clickedTile.next(false);
-    this.currentPlayer.next(1);
-    this.winner.next(3);
-    this.winningTiles.next([]);
   }
 
-  public updateScore(tmp : number) {
-    if (tmp == 1) {
-      let arr = [...this.playerScores.value];
+  updatePlayerScore(currentState: GameState, winner : number) : void {
+    let arr = [...currentState.playerScores];
+    if (winner == 1) {
       arr[0] = arr[0] + 1;
-      this.playerScores.next(arr);
     } else {
-      let arr = [...this.playerScores.value];
-      arr[1] = arr[1]+ 1;
-      this.playerScores.next(arr);
+      arr[1] = arr[1] + 1;
     }
+    this.state.next({
+      ...currentState,
+      playerScores: arr
+    })  
   }
 
 }
